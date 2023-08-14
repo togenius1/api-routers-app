@@ -1,0 +1,54 @@
+import { Fragment, useState } from 'react';
+import {
+    FeedbackType,
+    buildFeedbackPath,
+    extractFeedback,
+} from '../api/feedback';
+
+function FeedbackPage(props: Props) {
+    const [feedbackData, setFeedbackData] = useState<FeedbackType>();
+
+    function loadFeedbackHandler(id: string) {
+        fetch(`/api/feedback/${id}`)
+            .then((response) => response.json())
+            .then((data) => {
+                setFeedbackData(data.feedback);
+            });
+    }
+
+    return (
+        <Fragment>
+            {feedbackData && <p>{feedbackData.email}</p>}
+            <ul>
+                {props.feedbackItems.map((item) => (
+                    <li key={item.id}>
+                        {item.text}
+                        <button
+                            onClick={loadFeedbackHandler.bind(null, item.id)}
+                        >
+                            Show Details
+                        </button>
+                    </li>
+                ))}
+            </ul>
+        </Fragment>
+    );
+}
+
+export async function getStaticProps() {
+    const filePath = buildFeedbackPath();
+    const data = extractFeedback(filePath);
+
+    return {
+        props: {
+            feedbackItems: data,
+        },
+    };
+}
+
+export default FeedbackPage;
+
+//##################### Type ###################
+type Props = {
+    feedbackItems: any[];
+};
